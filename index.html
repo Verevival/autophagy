@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Дыхание аутофагии — 7 минут</title>
+  <style>
+    :root {
+      --bg: #f6f3ec;
+      --card: #fffdf8;
+      --text: #1f1d1a;
+      --muted: #5f5a52;
+      --accent: #1f7a5f;
+      --accent-2: #d9843b;
+      --accent-3: #5d9caf;
+      --border: #e7dfd4;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 20%, #fef8e8 0%, transparent 30%),
+        radial-gradient(circle at 90% 80%, #eaf8f2 0%, transparent 35%),
+        var(--bg);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+    }
+
+    .app {
+      width: min(760px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+    @media (max-width: 768px) {
+      .app { padding: 16px; border-radius: 12px; }
+    }
+    h1 { margin: 0 0 6px; font-size: clamp(24px,4vw,34px); line-height:1.2; }
+    .subtitle { margin:0 0 20px; color: var(--muted); }
+    .timers { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:16px; }
+    @media (max-width:480px){ .timers{grid-template-columns:1fr; gap:10px;} }
+    .tile { background:#fff; border:1px solid var(--border); border-radius:12px; padding:14px; }
+    @media (max-width:480px){ .tile {padding:12px;} }
+    .label { color: var(--muted); font-size:13px; margin-bottom:4px; }
+    .value { font-size:34px; font-weight:700; letter-spacing:.5px; }
+    @media (max-width:480px){ .value{font-size:28px;} }
+    .phase { border-left:4px solid var(--accent); background:#fbfffd; border-radius:10px; padding:14px; margin-bottom:12px; }
+    @media (max-width:480px){ .phase{padding:12px;font-size:14px;} }
+    .phase h2 { margin:0 0 6px; font-size:18px; }
+    @media (max-width:480px){ .phase h2{font-size:16px;} }
+    .phase p { margin:0; line-height:1.45; }
+    .micro { border-left-color: var(--accent-2); background:#fff9f2; margin-top:10px; display:none; flex-direction:column; align-items:center; text-align:center; }
+    .micro.active { display:flex; }
+    .dial-container { position:relative; width:220px; height:220px; margin:20px 0; display:none; }
+    @media (max-width:480px){ .dial-container{width:180px;height:180px;margin:15px 0;} }
+    .dial-container.active { display:block; }
+    .dial-sector { fill:none; stroke-width:20; }
+    .sector-inhale { stroke: var(--accent); }
+    .sector-hold { stroke: var(--accent-2); }
+    .sector-exhale { stroke: var(--accent-3); }
+    .dial-text { font-size:10px; font-weight:600; fill: var(--muted); text-transform:uppercase; text-anchor:middle; dominant-baseline:middle; }
+    .dial-hand { stroke: var(--text); stroke-width:4; stroke-linecap:round; transform-origin:center; transition:transform .2s linear; }
+    .dial-center-dot { fill: var(--text); }
+    .controls { display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+    @media (max-width:480px){ .controls{flex-direction:column;} }
+    button { border:none; border-radius:10px; padding:12px 18px; font-size:16px; font-weight:600; cursor:pointer; touch-action:manipulation; }
+    @media (max-width:480px){ button{width:100%; padding:14px 18px; font-size:17px;} }
+    #startBtn{background:var(--accent); color:white; }
+    #resetBtn{background:#ece6dc; color:#3d392f; }
+    .hint { color: var(--muted); font-size:13px; margin-top:12px; line-height:1.4; }
+    @media (max-width:480px){ .hint{font-size:12px;} }
+    .sound-toggle { position:absolute; top:20px; right:20px; background:transparent; border:none; cursor:pointer; padding:8px; font-size:24px; opacity:1; transition:opacity .2s; width:auto; }
+    .sound-toggle:hover{opacity:1;}
+    .sound-toggle[data-muted="true"]{opacity:0.5;}
+    @media (max-width:480px){ .sound-toggle{top:12px; right:12px; font-size:22px;} }
+    .app { position:relative; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <button type="button" id="soundToggle" class="sound-toggle" data-muted="false" title="Отключить звук" aria-label="Отключить звук">🔊</button>
+    <h1>Дыхание аутофагии: 7 минут</h1>
+    <p class="subtitle">Нажми старт и следуй подсказкам по этапам.</p>
+    <section class="timers">
+      <article class="tile"><div class="label">Общий таймер</div><div class="value" id="globalTime">07:00</div></article>
+      <article class="tile"><div class="label">Таймер фазы</div><div class="value" id="phaseTime">02:00</div></article>
+    </section>
+    <section class="phase" id="phaseBox">
+      <h2 id="phaseTitle">Фаза 1 (2 минуты): настройка</h2>
+      <p id="phaseText">Сядь с прямым позвоночником. Спокойно наблюдай дыхание. В конце фазы сделай полный выдох и короткую комфортную задержку, чтобы почувствовать «воздушный голод».</p>
+      <div class="phase micro active" id="microBox">
+        <h2 id="microTitle">Фаза 1: Настройка</h2>
+        <div class="phase micro active" id="microBox">
+          <h2 id="microTitle">Фаза 1: Настройка</h2>
+        </div>
+        <div id="dialPhase1" class="dial-container active">
+          <svg width="220" height="220" viewBox="0 0 200 200">
+            <path d="M 100 20 A 80 80 0 1 1 30.72 60" class="dial-sector sector-inhale" />
+            <path d="M 30.72 60 A 80 80 0 0 1 100 20" class="dial-sector sector-hold" />
+            <text x="130" y="100" class="dial-text" fill="#1f7a5f">Наблюдение</text>
+            <text x="70" y="60" class="dial-text" fill="#d9843b" style="font-size: 9px;">Выдох+Пауза</text>
+            <line id="handP1" x1="100" y1="100" x2="100" y2="25" class="dial-hand" />
+            <circle cx="100" cy="100" r="6" class="dial-center-dot" />
+          </svg>
+        </div>
+        <div id="dialPhase2" class="dial-container">
+          <svg width="220" height="220" viewBox="0 0 200 200">
+            <path d="M 100 20 A 80 80 0 0 1 180 100" class="dial-sector sector-inhale" />
+            <path d="M 180 100 A 80 80 0 0 1 100 180" class="dial-sector sector-hold" />
+            <path d="M 100 180 A 80 80 0 0 1 100 20" class="dial-sector sector-exhale" />
+            <text x="150" y="50" class="dial-text" fill="#1f7a5f">Вдох (5)</text>
+            <text x="150" y="150" class="dial-text" fill="#d9843b">Пауза (5)</text>
+            <text x="60" y="100" class="dial-text" fill="#5d9caf">Выдох (10)</text>
+            <line id="handP2" x1="100" y1="100" x2="100" y2="25" class="dial-hand" />
+            <circle cx="100" cy="100" r="6" class="dial-center-dot" />
+          </svg>
+        </div>
+        <div id="dialPhase3" class="dial-container">
+          <svg width="220" height="220" viewBox="0 0 200 200">
+            <path d="M 100 20 A 80 80 0 0 1 140 30.72" class="dial-sector sector-exhale" />
+            <path d="M 140 30.72 A 80 80 0 1 1 100 20" class="dial-sector sector-hold" />
+            <text x="150" y="40" class="dial-text" fill="#5d9caf" style="font-size: 9px;">Выдох</text>
+            <text x="100" y="130" class="dial-text" fill="#d9843b">Макс. пауза</text>
+            <line id="handP3" x1="100" y1="100" x2="100" y2="25" class="dial-hand" />
+            <circle cx="100" cy="100" r="6" class="dial-center-dot" />
+          </svg>
+        </div>
+        <p id="microText">Готовность...</p>
+      </div>
+    </section>
+    <div class="controls">
+      <button id="startBtn">Старт</button>
+      <button id="resetBtn">Сброс</button>
+    </div>
+    <p class="hint">Практика выполняется натощак: утром после пробуждения или минимум через 3 часа после еды.</p>
+  </main>
+  <script>
+    const TOTAL_SECONDS = 7 * 60;
+    const PHASES = [
+      { start:0, end:120, title:"Фаза 1 (2 минуты): настройка", text:"Сядь с прямым позвоночником. Спокойно наблюдай дыхание. В конце фазы сделай полный выдох и короткую комфортную задержку, чтобы почувствовать \u201cвоздушный голод\u201d." },
+      { start:120, end:360, title:"Фаза 2 (4 минуты): цикл 5-5-10", text:"Повтори 12 циклов: вдох через нос 5 сек, задержка 5 сек, длинный контролируемый выдох 10 сек." },
+      { start:360, end:420, title:"Фаза 3 (1 минута): задержки на выдохе", text:"После выдоха задерживай дыхание на пустых лёгких комфортно (цель 30-60 сек). Вдох только плавный, без рывка, повтори 2-3 раза." }
+    ];
+    const globalTime = document.getElementById("globalTime");
+    const phaseTime = document.getElementById("phaseTime");
+    const phaseTitle = document.getElementById("phaseTitle");
+    const phaseText = document.getElementById("phaseText");
+    const startBtn = document.getElementById("startBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const soundToggle = document.getElementById("soundToggle");
+    const microBox = document.getElementById("microBox");
+    const microTitle = document.getElementById("microTitle");
+    const microText = document.getElementById("microText");
+    const dialPhase1 = document.getElementById("dialPhase1");
+    const dialPhase2 = document.getElementById("dialPhase2");
+    const dialPhase3 = document.getElementById("dialPhase3");
+    const handP1 = document.getElementById("handP1");
+    const handP2 = document.getElementById("handP2");
+    const handP3 = document.getElementById("handP3");
+    let elapsed=0, intervalId=null, isRunning=false, audioCtx=null, lastPhaseIndex=0, lastBreathStep=null;
+    function fmt(sec){ const m=Math.floor(sec/60).toString().padStart(2,"0"); const s=(sec%60).toString().padStart(2,"0"); return `${m}:${s}`; }
+    function getPhase(sec){ return PHASES.find(p=>sec>=p.start && sec<p.end)||null; }
+    function getPhaseIndex(sec){ return PHASES.findIndex(p=>sec>=p.start && sec<p.end); }
+    function getBreathStep(sec){ if(sec<120||sec>=360) return null; const pos=(sec-120)%20; if(pos<5) return 0; if(pos<10) return 1; return 2; }
+    function ensureAudio(){ if(!audioCtx){ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); } if(audioCtx.state==='suspended') audioCtx.resume(); }
+    function isSoundMuted(){ return soundToggle.getAttribute('data-muted')==='true'; }
+    function playTone(freq,dur=0.12,vol=0.03,delay=0){ if(!audioCtx||isSoundMuted()) return; const now=audioCtx.currentTime+delay; const osc=audioCtx.createOscillator(); const gain=audioCtx.createGain(); osc.type='sine'; osc.frequency.value=freq; gain.gain.setValueAtTime(0.0001,now); gain.gain.exponentialRampToValueAtTime(vol,now+0.01); gain.gain.exponentialRampToValueAtTime(0.0001,now+dur); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now+dur+0.02); }
+    function playPattern(freqs,dur=0.1,gap=0.08,vol=0.03){ if(isSoundMuted()) return; freqs.forEach((f,i)=>playTone(f,dur,vol,i*gap)); }
+    function playAudioCue(sec){ if(!audioCtx||isSoundMuted()) return; const inPhase2=sec>=120&&sec<360; if(inPhase2){ const pos=(sec-120)%20; let start=0,len=5; if(pos<5){ start=0; len=5; } else if(pos<10){ start=5; len=5; } else { start=10; len=10; } const within=pos-start; const progress=len>1?within/(len-1):1; const tickFreq=760+progress*500; const tickVol=0.009+progress*0.004; playTone(tickFreq,0.035,tickVol); } else { const inPhase1=sec>=0&&sec<120; const baseVol=inPhase1?0.0033:0.01; playTone(920,0.035,baseVol); }
+      const curPhaseIdx=getPhaseIndex(sec);
+      if(curPhaseIdx!==lastPhaseIndex && sec>0){ if(curPhaseIdx===-1){ playPattern([660,880,1175],0.12,0.1,0.04); } else { playPattern([523,659,784],0.1,0.09,0.035); } }
+      lastPhaseIndex=curPhaseIdx;
+      const curStep=getBreathStep(sec);
+      if(inPhase2){ const pos=(sec-120)%20; if(pos===0){ if(sec>120){ playPattern([740,988],0.08,0.09,0.03); } else { playTone(740,0.1,0.03); } } else if(curStep!==lastBreathStep){ if(curStep===1) playTone(620,0.1,0.03); if(curStep===2) playTone(420,0.12,0.03); } }
+      lastBreathStep=curStep; }
+    function renderMicro(sec){ const idx=getPhaseIndex(sec); dialPhase1.classList.remove('active'); dialPhase2.classList.remove('active'); dialPhase3.classList.remove('active'); if(idx===-1){ microBox.classList.remove('active'); return; } microBox.classList.add('active'); if(idx===0){ dialPhase1.classList.add('active'); microTitle.textContent='Фаза 1: Настройка'; if(sec<100){ microText.textContent=`Спокойное дыхание (${100-sec}s)`; } else { microText.textContent=`ВЫДОХ и ПАУЗА (${120-sec}s)`; } const deg=(sec/120)*360; handP1.style.transform=`rotate(${deg}deg)`; } else if(idx===1){ dialPhase2.classList.add('active'); const secInPhase=sec-120; const cycle=Math.floor(secInPhase/20)+1; const pos=secInPhase%20; microTitle.textContent=`Цикл ${cycle} из 12`; if(pos<5){ microText.textContent=`Вдох: ${5-pos}`; } else if(pos<10){ microText.textContent=`Задержка: ${10-pos}`; } else { microText.textContent=`Выдох: ${20-pos}`; } const deg=pos*18; handP2.style.transform=`rotate(${deg}deg)`; } else if(idx===2){ dialPhase3.classList.add('active'); microTitle.textContent='Фаза 3: Гипоксия'; const secInPhase=sec-360; if(secInPhase<5){ microText.textContent=`Полный выдох (${5-secInPhase}s)`; } else { microText.textContent=`Максимальная задержка (${secInPhase-5}s)`; } const deg=(secInPhase/60)*360; handP3.style.transform=`rotate(${deg}deg)`; } }
+    function render(){ const remain=TOTAL_SECONDS-elapsed; globalTime.textContent=fmt(Math.max(remain,0)); const phase=getPhase(elapsed); if(phase){ phaseTitle.textContent=phase.title; phaseText.textContent=phase.text; phaseTime.textContent=fmt(phase.end-elapsed); } else { phaseTitle.textContent='Практика завершена'; phaseText.textContent='Сделай несколько спокойных вдохов и выдохов. Отметь ощущения в теле и ясность в голове.'; phaseTime.textContent='00:00'; } renderMicro(elapsed); }
+    function tick(){ elapsed+=1; if(elapsed>TOTAL_SECONDS){ clearInterval(intervalId); intervalId=null; isRunning=false; startBtn.textContent='Старт'; return; } playAudioCue(elapsed); render(); }
+    startBtn.addEventListener('click',()=>{ if(!isRunning){ ensureAudio(); isRunning=true; startBtn.textContent='Пауза'; intervalId=setInterval(tick,1000); } else { isRunning=false; startBtn.textContent='Продолжить'; clearInterval(intervalId); intervalId=null; } });
+    resetBtn.addEventListener('click',()=>{ isRunning=false; startBtn.textContent='Старт'; clearInterval(intervalId); intervalId=null; elapsed=0; lastPhaseIndex=getPhaseIndex(elapsed); lastBreathStep=getBreathStep(elapsed); handP1.style.transform='rotate(0deg)'; handP2.style.transform='rotate(0deg)'; handP3.style.transform='rotate(0deg)'; render(); });
+    soundToggle.addEventListener('click',()=>{ const muted=soundToggle.getAttribute('data-muted')==='true'; const nowMuted=!muted; soundToggle.setAttribute('data-muted',nowMuted?'true':'false'); soundToggle.textContent=nowMuted?'🔇':'🔊'; soundToggle.title=nowMuted?'Включить звук':'Отключить звук'; soundToggle.setAttribute('aria-label',soundToggle.title); });
+    lastPhaseIndex=getPhaseIndex(elapsed); lastBreathStep=getBreathStep(elapsed); render();
+  </script>
+</body>
+</html>
